@@ -47409,13 +47409,26 @@ function Panel:ApplySectionPalette(section)
  if section.HeaderDivider then section.HeaderDivider.BackgroundColor3=Color3.fromHex(palette.border)end
 end
 local function section(parent,title,icon)
- local s=parent:Section({Title=title,Icon=icon,TextSize=16,Box=true,BoxBorder=true,Opened=true})
+ local s=parent:Section({Title=title,Icon=icon=="keycap-w" and "keyboard" or icon,TextSize=16,Box=true,BoxBorder=true,Opened=true})
  s.HeaderSize=46
  task.defer(function()
   if not Panel.alive then return end
   local top=s.ElementFrame.Outline.Top
   top.AutomaticSize=Enum.AutomaticSize.None;top.Size=UDim2.new(1,0,0,46)
   for _,image in ipairs(top:GetDescendants())do if image:IsA("ImageLabel")then image.Size=image.Image=="rbxassetid://134243273101015"and UDim2.fromOffset(12,12)or UDim2.fromOffset(16,16)end end
+  if icon=="keycap-w"then
+   for _,image in ipairs(top:GetDescendants())do
+    if image:IsA("ImageLabel")and image.Image=="rbxassetid://121474456068237"then
+     image.Image=""
+     local cap=new("Frame",{Name="KeycapW",AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(16,13),BackgroundTransparency=1,BorderSizePixel=0},image)
+     new("UICorner",{CornerRadius=UDim.new(0,3)},cap)
+     local stroke=new("UIStroke",{Thickness=1,Color=image.ImageColor3,Transparency=image.ImageTransparency},cap)
+     local letter=new("TextLabel",{Name="Key",Text="W",FontFace=Font.new(Brand.font,Enum.FontWeight.Medium),TextSize=10,TextColor3=image.ImageColor3,BackgroundTransparency=1,Size=UDim2.fromScale(1,1)},cap)
+     connect(image:GetPropertyChangedSignal("ImageColor3"),function()stroke.Color=image.ImageColor3;letter.TextColor3=image.ImageColor3 end)
+     break
+    end
+   end
+  end
   local padding=s.ElementFrame.Outline.Content:FindFirstChildOfClass("UIPadding")
   if padding then padding.PaddingLeft=UDim.new(0,12);padding.PaddingRight=UDim.new(0,12);padding.PaddingTop=UDim.new(0,4);padding.PaddingBottom=UDim.new(0,8)end
   s.HeaderDivider=new("Frame",{Name="HeaderDivider",BorderSizePixel=0,BackgroundColor3=Color3.fromHex("#3A3A3A"),BackgroundTransparency=.58,Position=UDim2.fromOffset(1,45),Size=UDim2.new(1,-2,0,1),Visible=s.Opened},s.ElementFrame)
@@ -48428,7 +48441,7 @@ end,2)
 toggle(npc,"Collect Chests","chests",function()return S.collectChests end,function(v)S.collectChests=v end)
 choice(npc,"Chest Rarities","chestRarities",{"Common","Rare","Epic","Legendary"},function()return keys(S.chestRarities)end,function(v)S.chestRarities=selection(v)end,true)
 toggle(npc,"Collect Mimics","mimics",function()return S.mimic.enabled end,function(v)S.mimic.enabled=v end)
-local moves=section(fc,"Moves","zap")
+local moves=section(fc,"Moves","keycap-w")
 for _,v in ipairs({{"Auto Quick Time Event (QTE)","autoQTE"},{"Auto Instant Judgement Cut","autoJC"},{"Auto Use Moves","autoMoves"},{"Auto Use Move Inputs","autoInputs"}})do
  local title,key=v[1],v[2]
  toggle(moves,title,key,function()return S.moves[key]end,function(value)S.moves[key]=value;S.moves:Changed()end)
@@ -48436,7 +48449,7 @@ end
 choice(moves,"Moves","moves",S.moves.namedOptions,function()return keys(S.moves.selectedMoves)end,function(v)S.moves.selectedMoves=selection(v) S.moves:Changed()end,true)
 choice(moves,"Move Inputs","inputs",S.moves.inputOptions,function()local t={}for _,name in ipairs(S.moves.inputOptions)do if S.moves.selectedInputs[name:upper()]then t[#t+1]=name end end;return t end,function(v)local t={}for _,name in ipairs(v)do t[name:upper()]=true end;S.moves.selectedInputs=t;S.moves:Changed()end,true)
 choice(moves,"Reset Character Conditions","resetConditions",{"Buso Cooldown","Form Cooldown"},function()local t={}if S.lifecycle.busoReset then t[#t+1]="Buso Cooldown"end;if S.lifecycle.formReset then t[#t+1]="Form Cooldown"end;return t end,function(v)S.lifecycle:SetBusoReset(table.find(v,"Buso Cooldown")~=nil) S.lifecycle:SetFormReset(table.find(v,"Form Cooldown")~=nil)end,true)
-local progress=section(fr,"Progression","trending-up")
+local progress=section(fr,"Progression","chevrons-up")
 toggle(progress,"Auto Ascend","ascend",function()return S.items.autoAscend end,function(v)S.items.autoAscend=v end)
 toggle(progress,"Auto Tether Return","tether",function()return S.items.autoTether==true end,function(v)S.items.autoTether=v end)
 toggle(progress,"Auto Claim All Achievements","achievements",function()return S.rewards.achievements end,function(v)S.rewards:SetEnabled("achievements",v)end)
