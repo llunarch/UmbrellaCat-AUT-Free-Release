@@ -48449,13 +48449,14 @@ toggle(npc,"Collect Chests","chests",function()return S.collectChests end,functi
 choice(npc,"Chest Rarities","chestRarities",{"Common","Rare","Epic","Legendary"},function()return keys(S.chestRarities)end,function(v)S.chestRarities=selection(v)end,true)
 toggle(npc,"Collect Mimics","mimics",function()return S.mimic.enabled end,function(v)S.mimic.enabled=v end)
 local moves=section(fc,"Moves","keycap-w")
-for _,v in ipairs({{"Auto Use Moves","autoMoves"},{"Auto Use Move Inputs","autoInputs"}})do
+for _,v in ipairs({{"Auto Use Moves","autoMoves"}})do
  local title,key=v[1],v[2]
  toggle(moves,title,key,function()return S.moves[key]end,function(value)S.moves[key]=value;S.moves:Changed()end)
 end
-choice(moves,"Moves","moves",S.moves.namedOptions,function()return keys(S.moves.selectedMoves)end,function(v)S.moves.selectedMoves=selection(v) S.moves:Changed()end,true)
-choice(moves,"Move Inputs","inputs",S.moves.inputOptions,function()local t={}for _,name in ipairs(S.moves.inputOptions)do if S.moves.selectedInputs[name:upper()]then t[#t+1]=name end end;return t end,function(v)local t={}for _,name in ipairs(v)do t[name:upper()]=true end;S.moves.selectedInputs=t;S.moves:Changed()end,true)
 toggle(moves,"Buso Haki Reset","busoReset",function()return S.lifecycle.busoReset end,function(v)S.lifecycle:SetBusoReset(v)end)
+choice(moves,"Moves","moves",S.moves.namedOptions,function()return keys(S.moves.selectedMoves)end,function(v)S.moves.selectedMoves=selection(v) S.moves:Changed()end,true)
+toggle(moves,"Auto Use Move Inputs","autoInputs",function()return S.moves.autoInputs end,function(value)S.moves.autoInputs=value;S.moves:Changed()end)
+choice(moves,"Move Inputs","inputs",S.moves.inputOptions,function()local t={}for _,name in ipairs(S.moves.inputOptions)do if S.moves.selectedInputs[name:upper()]then t[#t+1]=name end end;return t end,function(v)local t={}for _,name in ipairs(v)do t[name:upper()]=true end;S.moves.selectedInputs=t;S.moves:Changed()end,true)
 for _,v in ipairs({{"Auto Quick Time Event (QTE)","autoQTE"},{"Auto Instant Judgement Cut","autoJC"}})do
  local title,key=v[1],v[2]
  toggle(moves,title,key,function()return S.moves[key]end,function(value)S.moves[key]=value;S.moves:Changed()end)
