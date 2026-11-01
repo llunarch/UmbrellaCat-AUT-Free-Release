@@ -47415,7 +47415,14 @@ local function section(parent,title,icon)
   if not Panel.alive then return end
   local top=s.ElementFrame.Outline.Top
   top.AutomaticSize=Enum.AutomaticSize.None;top.Size=UDim2.new(1,0,0,46)
-  for _,image in ipairs(top:GetDescendants())do if image:IsA("ImageLabel")then image.Size=image.Image=="rbxassetid://134243273101015"and UDim2.fromOffset(12,12)or UDim2.fromOffset(16,16)end end
+  local headerPadding=top:FindFirstChildOfClass("UIPadding")
+  if headerPadding then headerPadding.PaddingLeft=UDim.new(0,12)end
+  for _,image in ipairs(top:GetDescendants())do
+   if image:IsA("ImageLabel")then
+    image.Size=image.Image=="rbxassetid://134243273101015"and UDim2.fromOffset(12,12)or UDim2.fromOffset(16,16)
+    if image.Parent~=top then image.AnchorPoint=Vector2.new(.5,.5);image.Position=UDim2.fromScale(.5,.5)end
+   end
+  end
   if icon=="keycap-w"then
    for _,image in ipairs(top:GetDescendants())do
     if image:IsA("ImageLabel")and image.Image=="rbxassetid://121474456068237"then
@@ -47423,7 +47430,7 @@ local function section(parent,title,icon)
      local cap=new("Frame",{Name="KeycapW",AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(16,13),BackgroundTransparency=1,BorderSizePixel=0},image)
      new("UICorner",{CornerRadius=UDim.new(0,3)},cap)
      local stroke=new("UIStroke",{Thickness=1,Color=image.ImageColor3,Transparency=image.ImageTransparency},cap)
-     local letter=new("TextLabel",{Name="Key",Text="W",FontFace=Font.new(Brand.font,Enum.FontWeight.Medium),TextSize=10,TextColor3=image.ImageColor3,BackgroundTransparency=1,Size=UDim2.fromScale(1,1)},cap)
+     local letter=new("TextLabel",{Name="Key",Text="W",FontFace=Font.new(Brand.font,Enum.FontWeight.Medium),TextSize=8,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,TextColor3=image.ImageColor3,BackgroundTransparency=1,Size=UDim2.fromScale(1,1)},cap)
      connect(image:GetPropertyChangedSignal("ImageColor3"),function()stroke.Color=image.ImageColor3;letter.TextColor3=image.ImageColor3 end)
      break
     end
