@@ -1790,7 +1790,7 @@ local p=game.Players.LocalPlayer
 local L={alive=true,busy=false,busoReset=false,formReset=false,status="Ready",events={},requests={},connections={}}
 S.lifecycle=L
 local saved=env.__UmbrellaFreeLifecycleReloadSettings
-if saved and  true   then L.busoReset=saved.busoReset==true;L.formReset=saved.formReset==true end
+if saved and  true   then L.busoReset=saved.busoReset==true;L.formReset=false end
 env.__UmbrellaFreeLifecycleReloadSettings=nil
 local function log(kind,data)
     L.events[#L.events+1]={time=os.clock(),kind=kind,data=data}
@@ -48449,13 +48449,17 @@ toggle(npc,"Collect Chests","chests",function()return S.collectChests end,functi
 choice(npc,"Chest Rarities","chestRarities",{"Common","Rare","Epic","Legendary"},function()return keys(S.chestRarities)end,function(v)S.chestRarities=selection(v)end,true)
 toggle(npc,"Collect Mimics","mimics",function()return S.mimic.enabled end,function(v)S.mimic.enabled=v end)
 local moves=section(fc,"Moves","keycap-w")
-for _,v in ipairs({{"Auto Quick Time Event (QTE)","autoQTE"},{"Auto Instant Judgement Cut","autoJC"},{"Auto Use Moves","autoMoves"},{"Auto Use Move Inputs","autoInputs"}})do
+for _,v in ipairs({{"Auto Use Moves","autoMoves"},{"Auto Use Move Inputs","autoInputs"}})do
  local title,key=v[1],v[2]
  toggle(moves,title,key,function()return S.moves[key]end,function(value)S.moves[key]=value;S.moves:Changed()end)
 end
 choice(moves,"Moves","moves",S.moves.namedOptions,function()return keys(S.moves.selectedMoves)end,function(v)S.moves.selectedMoves=selection(v) S.moves:Changed()end,true)
 choice(moves,"Move Inputs","inputs",S.moves.inputOptions,function()local t={}for _,name in ipairs(S.moves.inputOptions)do if S.moves.selectedInputs[name:upper()]then t[#t+1]=name end end;return t end,function(v)local t={}for _,name in ipairs(v)do t[name:upper()]=true end;S.moves.selectedInputs=t;S.moves:Changed()end,true)
-choice(moves,"Reset Character Conditions","resetConditions",{"Buso Cooldown","Form Cooldown"},function()local t={}if S.lifecycle.busoReset then t[#t+1]="Buso Cooldown"end;if S.lifecycle.formReset then t[#t+1]="Form Cooldown"end;return t end,function(v)S.lifecycle:SetBusoReset(table.find(v,"Buso Cooldown")~=nil) S.lifecycle:SetFormReset(table.find(v,"Form Cooldown")~=nil)end,true)
+toggle(moves,"Buso Haki Reset","busoReset",function()return S.lifecycle.busoReset end,function(v)S.lifecycle:SetBusoReset(v)end)
+for _,v in ipairs({{"Auto Quick Time Event (QTE)","autoQTE"},{"Auto Instant Judgement Cut","autoJC"}})do
+ local title,key=v[1],v[2]
+ toggle(moves,title,key,function()return S.moves[key]end,function(value)S.moves[key]=value;S.moves:Changed()end)
+end
 local progress=section(fr,"Progression","chevrons-up")
 toggle(progress,"Auto Ascend","ascend",function()return S.items.autoAscend end,function(v)S.items.autoAscend=v end)
 toggle(progress,"Auto Tether Return","tether",function()return S.items.autoTether==true end,function(v)S.items.autoTether=v end)
@@ -48465,19 +48469,6 @@ local traitS=assert(S.traits)
 traitS.onError=function(err)ui.WindUI:Notify({Title="Traits",Content=err,Duration=6})end
 local traitLeft,traitRight=columns(Traits,3,"center")
 local traitSection=section(traitLeft,"Auto Trait","dices")
-do
- local row=traitSection:Button({Title="",Callback=function()end})
- local frame=row.ElementFrame
- for _,object in ipairs(frame:GetChildren())do if object:IsA("GuiObject")then object.Visible=false end end
- local padding=frame:FindFirstChildOfClass("UIPadding");if padding then padding:Destroy()end
- frame.AutomaticSize=Enum.AutomaticSize.None;frame.Size=UDim2.new(1,0,0,22);frame.ImageTransparency=1
- local label=new("TextLabel",{Name="RolledTraits",Text=traitS:RolledText(),RichText=true,Font=Enum.Font.Gotham,TextSize=14,
-  TextColor3=Color3.fromRGB(155,155,165),TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,
-  TextWrapped=true,BackgroundTransparency=1,Position=UDim2.fromOffset(3,1),Size=UDim2.new(1,-6,1,-2)},frame)
- label:SetAttribute("UmbrellaFreeSmall",true)
- P.rolledTraitsLabel=label;P.rolledTraitsFrame=frame
-end
-
 local traitControls={}
 local traitColors={Epic="#AF5AFF",Legendary="#FF964B",Mythic="#FF5500",Hexed="#8000FF"}
 local traitStrokes={Epic="#582D80",Legendary="#804B26",Mythic="#802B00",Hexed="#400080"}
@@ -48725,6 +48716,12 @@ end
 function P:ApplyConfig(data)
  if type(data)=="string"then data=assert(bank().configs[data],"Choose a saved config")end
  assert(type(data)=="table"and data.schema==1 and type(data.values)=="table","Invalid FREE config")
+ data=table.clone(data);data.values=table.clone(data.values)
+ if data.values.resetConditions~=nil then
+  assert(type(data.values.resetConditions)=="table","Invalid old reset settings")
+  if data.values.busoReset==nil then data.values.busoReset=table.find(data.values.resetConditions,"Buso Cooldown")~=nil end
+  data.values.resetConditions=nil
+ end
  if data.theme then assert(table.find(self.themes,data.theme),"Unknown saved theme")end
  local ordered={}
  for key,value in pairs(data.values)do
@@ -48815,7 +48812,6 @@ local syncClock=0
 connect(Run.Heartbeat,function(dt)
  if not P.alive then return end
  syncClock+=dt;if syncClock<.12 then return end;syncClock=0
- local rolled=S.traits:RolledText();P.rolledTraitsLabel.Text=rolled;P.rolledTraitsFrame.Size=UDim2.new(1,0,0,math.max(22,P.rolledTraitsLabel.TextBounds.Y+2))
  P.statControls.status.Text=S.statRoll:Text()
  P.nextAbilities:Select(S.traits:QueueLabels())
  for _,b in pairs(bindings)do if b.kind=="boolean"and not P.loadingConfig and(b.control.pendingCallbacks or 0)==0 then local value=b.get()==true;if b.control.Value~=value then b.control:Set(value,false)end end end
