@@ -47493,7 +47493,7 @@ local function check(parent,title,value,callback)
  local thumb=new("Frame",{Name="ToggleThumb",BackgroundColor3=Color3.fromHex("#F5F5F5"),BorderSizePixel=0,Size=UDim2.fromOffset(18,18),Position=UDim2.new(0,3,.5,-9)},box)
  new("UICorner",{CornerRadius=UDim.new(1,0)},thumb)
  local featureTitle=new("TextLabel",{Name="FeatureTitle",Text=title,TextSize=15,TextScaled=true,TextColor3=Color3.fromHex("#EEEEEE"),BackgroundTransparency=1,Position=UDim2.fromOffset(0,0),Size=UDim2.new(1,-52,1,0),TextXAlignment=Enum.TextXAlignment.Left,TextTruncate=Enum.TextTruncate.AtEnd},frame)
- new("UITextSizeConstraint",{MinTextSize=11,MaxTextSize=15},featureTitle)
+ new("UITextSizeConstraint",{MinTextSize=12,MaxTextSize=18},featureTitle)
  local lock=new("ImageLabel",{Name="ControlLock",Image="rbxassetid://134724289526879",ImageColor3=Color3.fromHex("#EEEEEE"),ScaleType=Enum.ScaleType.Fit,BackgroundTransparency=1,Size=UDim2.fromOffset(13,13),AnchorPoint=Vector2.new(1,1),Position=UDim2.new(1,3,1,3),Visible=false,ZIndex=50},box)
  local blocker=new("TextButton",{Name="ControlBlocker",Text="",BackgroundTransparency=1,AutoButtonColor=false,Size=UDim2.fromScale(1,1),Visible=false,ZIndex=51},frame)
  c.lockIndicator=lock;c.lockBlocker=blocker
@@ -47771,7 +47771,7 @@ local function layoutNavigation(width)
  local compact=width<620
  local function place(entry,buttonWidth)
   entry.button.Size=UDim2.fromOffset(buttonWidth,38)
-  entry.label.TextSize=compact and 14 or 15
+  entry.label.TextSize=compact and 16 or 17
   local iconWidth=not compact and entry.icon and 24 or 0
   local textWidth=math.min(math.max(entry.label.TextBounds.X,24),buttonWidth-iconWidth-12)
   local start=(buttonWidth-iconWidth-textWidth)/2
@@ -48121,7 +48121,7 @@ local function responsive()
  layoutNavigation(width)
  local columnsAvailable=width>=1040 and 3 or width>=740 and 2 or 1
  local compact=width<620
-  brandTitle.TextSize=compact and 19 or 22
+  brandTitle.TextSize=compact and 21 or 25
  for _,layout in ipairs(Panel.layouts)do
   local used=0
   for _,card in ipairs(layout.cards)do used=math.max(used,card.UmbrellaColumn)end
@@ -48293,7 +48293,11 @@ local function english(obj)
   local weight=obj:GetAttribute("UmbrellaFreeWeight")or(obj.Name=="Check"and 700 or heading and 600 or obj:IsDescendantOf(Window.UIElements.SideBar)and 500 or 400)
   local weights={[400]=Enum.FontWeight.Regular,[500]=Enum.FontWeight.Medium,[600]=Enum.FontWeight.SemiBold,[700]=Enum.FontWeight.Bold}
   obj.FontFace=Font.new(family,weights[weight]or Enum.FontWeight.Regular)
-  if not obj:GetAttribute("UmbrellaFreeSmall")and obj.Name~="Check"and obj.TextSize<16 then obj.TextSize=16 end
+  if obj.Name~="Check"and obj.Name~="Key"then
+   local baseline=obj.TextSize
+   if not obj:GetAttribute("UmbrellaFreeSmall")and baseline<16 then baseline=16 end
+   obj.TextSize=math.floor(baseline*1.12+.5)
+  end
  end
 end
 for _,obj in ipairs(root:GetDescendants())do english(obj)end
