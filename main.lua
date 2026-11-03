@@ -1340,12 +1340,14 @@ function S:UpdateDownView(forceOff)
     end
 end
 function S:PreventIdle()
-    if unloaded or(not self.active and  true and  true and  true and  true and  true and  true and  true and  true and  true and  true and  true and  true and  true and  true )then return false end
+    if unloaded then return false end
     if self.lastIdlePulse and os.clock()-self.lastIdlePulse<30 then return false end
     local camera=workspace.CurrentCamera;if not camera then return false end
     self.lastIdlePulse=os.clock()
-    local virtualUser=game:GetService("VirtualUser")
-    local ok,err=pcall(function()virtualUser:CaptureController() virtualUser:MoveMouse(Vector2.new(1,1),camera.CFrame)end)
+    local ok,err=pcall(function()
+        local virtualUser=game:GetService("VirtualUser")
+        virtualUser:CaptureController();virtualUser:MoveMouse(Vector2.new(1,1),camera.CFrame)
+    end)
     record(ok and "idle-prevented"or "idle-prevention-error",not ok and tostring(err)or nil)
     return ok
 end
